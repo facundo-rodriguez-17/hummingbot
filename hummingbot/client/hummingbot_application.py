@@ -13,6 +13,7 @@ from hummingbot.core.data_type.user_stream_tracker import UserStreamTrackerDataS
 from hummingbot.logger import HummingbotLogger
 from hummingbot.logger.application_warning import ApplicationWarning
 from hummingbot.market.binance.binance_market import BinanceMarket
+from hummingbot.market.ripio.ripio_market import RipioMarket
 from hummingbot.market.bittrex.bittrex_market import BittrexMarket
 from hummingbot.market.kucoin.kucoin_market import KucoinMarket
 from hummingbot.market.coinbase_pro.coinbase_pro_market import CoinbaseProMarket
@@ -62,6 +63,7 @@ MARKET_CLASSES = {
     "kucoin": KucoinMarket,
     "bitcoin_com": BitcoinComMarket,
     "kraken": KrakenMarket,
+    "ripio": RipioMarket
 }
 
 
@@ -130,6 +132,10 @@ class HummingbotApplication(*commands):
             notifier.add_msg_to_queue(msg)
 
     def _handle_command(self, raw_command: str):
+        # unset to_stop_config flag it triggered before loading any command
+        if self.app.to_stop_config:
+            self.app.to_stop_config = False
+
         raw_command = raw_command.lower().strip()
         try:
             if self.placeholder_mode:
@@ -252,6 +258,17 @@ class HummingbotApplication(*commands):
                     trading_pairs=trading_pairs,
                     trading_required=self._trading_required,
                 )
+
+            elif market_name == "ripio":
+                ripio_api_key = global_config_map.get("ripio_api_key").value
+                ripio_secret_key = global_config_map.get("ripio_secret_key").value
+                ripio_passphrase = global_config_map.get("ripio_passphrase").value
+
+                market = RipioMarket(ripio_api_key,
+                    ripio_secret_key,
+                    ripio_passphrase,
+                    symbols=symbols,
+                    trading_required=self._trading_required)
 
             elif market_name == "radar_relay":
                 assert self.wallet is not None

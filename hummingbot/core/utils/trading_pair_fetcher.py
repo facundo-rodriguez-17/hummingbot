@@ -58,6 +58,23 @@ class TradingPairFetcher:
         self.trading_pairs: Dict[str, Any] = {}
         safe_ensure_future(self.fetch_all())
 
+    
+    @staticmethod
+    async def fetch_ripio_trading_pairs() -> List[str]:
+    	# Returns a List of str, representing each active trading pair on the exchange.
+    	async with aiohttp.ClientSession() as client:
+            async with client.get(RIPIO_ENDPOINT, timeout=API_CALL_TIMEOUT) as response:
+                if response.status == 200:
+                    try:
+                        all_trading_pairs: List[Dict[str, any]] = await response.json()
+                        return [item["symbol"]
+                                for item in all_trading_pairs
+                                if item["status"] == "ONLINE"]  # Only returns active trading pairs
+                    except Exception:
+                        pass
+                        # Do nothing if the request fails -- there will be no autocomplete available
+                return []
+    
     async def fetch_binance_trading_pairs(self) -> List[str]:
         try:
             from hummingbot.market.binance.binance_market import BinanceMarket
@@ -339,7 +356,8 @@ class TradingPairFetcher:
                  self.fetch_kucoin_trading_pairs(),
                  self.fetch_bitcoin_com_trading_pairs(),
                  self.fetch_kraken_trading_pairs(),
-                 self.fetch_radar_relay_trading_pairs()]
+                 self.fetch_radar_relay_trading_pairs(),
+                 self.fetch_ripio_trading_pairs()]
 
         # Radar Relay has not yet been migrated to a new version
         # Endpoint needs to be updated after migration
@@ -357,6 +375,7 @@ class TradingPairFetcher:
             "kucoin": results[7],
             "bitcoin_com": results[8],
             "kraken": results[9],
-            "radar_relay": results[10]
+            "radar_relay": results[10],
+            "ripio": results[11]
         }
         self.ready = True

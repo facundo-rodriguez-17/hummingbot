@@ -36,7 +36,8 @@ EXCHANGES = {
     "bittrex",
     "kucoin",
     "bitcoin_com",
-    "kraken"
+    "kraken",
+    "ripio"
 }
 
 DEXES = {
@@ -58,7 +59,8 @@ EXAMPLE_PAIRS = {
     "huobi": "ETH-USDT",
     "liquid": "ETH-USD",
     "radar_relay": "ZRX-WETH",
-    "kraken": "ETH-USDC"
+    "kraken": "ETH-USDC",
+    "ripio" : "ETH-BTC"
 }
 
 EXAMPLE_ASSETS = {
@@ -72,7 +74,8 @@ EXAMPLE_ASSETS = {
     "huobi": "eth",
     "liquid": "ETH",
     "radar_relay": "ZRX",
-    "kraken": "XETH"
+    "kraken": "XETH",
+    "ripio": "USDC"
 }
 
 MAXIMUM_OUTPUT_PANE_LINE_COUNT = 1000

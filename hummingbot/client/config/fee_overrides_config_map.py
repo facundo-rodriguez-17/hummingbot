@@ -16,6 +16,8 @@ def new_fee_config_var(key):
 fee_overrides_config_map = {
     "binance_maker_fee": new_fee_config_var("binance_maker_fee"),
     "binance_taker_fee": new_fee_config_var("binance_taker_fee"),
+    "ripio_maker_fee": new_fee_config_var("ripio_maker_fee"),
+    "ripio_taker_fee": new_fee_config_var("ripio_taker_fee"),
     "coinbase_pro_maker_fee": new_fee_config_var("coinbase_pro_maker_fee"),
     "coinbase_pro_taker_fee": new_fee_config_var("coinbase_pro_taker_fee"),
     "huobi_maker_fee": new_fee_config_var("huobi_maker_fee"),
@@ -28,4 +30,10 @@ fee_overrides_config_map = {
     "kucoin_taker_fee": new_fee_config_var("kucoin_taker_fee"),
     "kraken_maker_fee": new_fee_config_var("kraken_maker_fee"),
     "kraken_taker_fee": new_fee_config_var("kraken_taker_fee"),
+    "dolomite_maker_fee_amount": new_fee_config_var("dolomite_maker_fee_amount"),
+    "dolomite_taker_fee_amount": new_fee_config_var("dolomite_taker_fee_amount"),
+    "bamboo_relay_maker_fee_amount": new_fee_config_var("bamboo_relay_maker_fee_amount"),
+    "bamboo_relay_taker_fee_amount": new_fee_config_var("bamboo_relay_taker_fee_amount"),
+    "radar_relay_maker_fee_amount": new_fee_config_var("radar_relay_maker_fee_amount"),
+    "radar_relay_taker_fee_amount": new_fee_config_var("radar_relay_taker_fee_amount")
 }

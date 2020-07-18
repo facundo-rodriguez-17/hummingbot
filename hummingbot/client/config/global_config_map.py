@@ -110,6 +110,7 @@ global_config_map = {
                            ["USDC", 3000],
                            ["TUSD", 3000],
                            ["PAX", 3000]]),
+    
     "binance_api_key":
         ConfigVar(key="binance_api_key",
                   prompt="Enter your Binance API key >>> ",
@@ -122,6 +123,18 @@ global_config_map = {
                   required_if=using_exchange("binance"),
                   is_secure=True,
                   is_connect_key=True),
+    "ripio_api_key": 
+       ConfigVar(key="ripio_api_key",
+                 prompt="Enter your RIPIO API key >>> ",
+                 required_if=using_exchange("ripio"),
+                 is_secure=True,
+                 is_connect_key=True),
+    "ripio_secret_key": 
+       ConfigVar(key="ripio_secret_key",
+                 prompt="Enter your RIPIO secret key >>> ",
+                 required_if=using_exchange("ripio"),
+                 is_secure=True,
+                 is_connect_key=True),
     "coinbase_pro_api_key":
         ConfigVar(key="coinbase_pro_api_key",
                   prompt="Enter your Coinbase API key >>> ",
@@ -232,6 +245,19 @@ global_config_map = {
                   required_if=using_exchange("kraken"),
                   is_secure=True,
                   is_connect_key=True),
+    "celo_address":
+        ConfigVar(key="celo_address",
+                  prompt="Enter your Celo account address >>> ",
+                  type_str="str",
+                  required_if=lambda: False,
+                  is_connect_key=True),
+    "celo_password":
+        ConfigVar(key="celo_password",
+                  prompt="Enter your Celo account password >>> ",
+                  type_str="str",
+                  required_if=lambda: global_config_map["celo_address"].value is not None,
+                  is_secure=True,
+                  is_connect_key=True),
     "ethereum_wallet":
         ConfigVar(key="ethereum_wallet",
                   prompt="Enter your wallet private key >>> ",
@@ -262,23 +288,6 @@ global_config_map = {
                   required_if=lambda: False,
                   type_str="bool",
                   default=False),
-    "exchange_rate_conversion":
-        ConfigVar(key="exchange_rate_conversion",
-                  prompt="Enter your custom exchange rate conversion settings (Input must be valid json) >>> ",
-                  required_if=lambda: False,
-                  type_str="json",
-                  default=[["USD", 1.0, "manual"],
-                           ["DAI", 1.0, "coin_gecko_api"],
-                           ["USDT", 1.0, "coin_gecko_api"],
-                           ["USDC", 1.0, "coin_gecko_api"],
-                           ["TUSD", 1.0, "coin_gecko_api"]]),
-    "exchange_rate_fetcher":
-        ConfigVar(key="exchange_rate_fetcher",
-                  prompt="Enter your custom exchange rate fetcher settings >>> ",
-                  required_if=lambda: False,
-                  type_str="list",
-                  default=[["ETH", "coin_gecko_api"],
-                           ["DAI", "coin_gecko_api"]]),
     "kill_switch_enabled":
         ConfigVar(key="kill_switch_enabled",
                   prompt="Would you like to enable the kill switch? (Yes/No) >>> ",
@@ -308,11 +317,6 @@ global_config_map = {
         ConfigVar(key="telegram_chat_id",
                   prompt="What is your telegram chat id? >>> ",
                   required_if=lambda: False),
-    "exchange_rate_default_data_feed":
-        ConfigVar(key="exchange_rate_default_data_feed",
-                  prompt="What is your default exchange rate data feed name? >>> ",
-                  required_if=lambda: False,
-                  default="coin_gecko_api"),
     "send_error_logs":
         ConfigVar(key="send_error_logs",
                   prompt="Would you like to send error logs to hummingbot? (Yes/No) >>> ",
@@ -361,4 +365,10 @@ global_config_map = {
                   type_str="str",
                   required_if=lambda: global_config_map.get("db_engine").value != "sqlite",
                   default="dbname"),
+    "0x_active_cancels":
+        ConfigVar(key="0x_active_cancels",
+                  prompt="Enable active order cancellations for 0x exchanges (warning: this costs gas)?  >>> ",
+                  type_str="bool",
+                  default=False,
+                  validator=validate_bool),
 }
