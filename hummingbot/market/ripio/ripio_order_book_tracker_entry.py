@@ -1,6 +1,6 @@
 from hummingbot.core.data_type.order_book import OrderBook
 from hummingbot.core.data_type.order_book_tracker_entry import OrderBookTrackerEntry
-from hummingbot.market.bittrex.bittrex_active_order_tracker import BittrexActiveOrderTracker
+from hummingbot.market.ripio.ripio_active_order_tracker import RipioActiveOrderTracker
 
 
 class RipioOrderBookTrackerEntry(OrderBookTrackerEntry):

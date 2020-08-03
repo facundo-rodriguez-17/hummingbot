@@ -27,7 +27,7 @@ class RipioOrderBookMessage(OrderBookMessage):
             if message_type is OrderBookMessageType.SNAPSHOT:
                 raise ValueError("timestamp must not be None when initializing snapshot messages.")
             timestamp = pd.Timestamp(content["time"], tz="UTC").timestamp()
-        return super(BittrexOrderBookMessage, cls).__new__(
+        return super(RipioOrderBookMessage, cls).__new__(
             cls, message_type, content, timestamp=timestamp, *args, **kwargs
         )
 
@@ -45,11 +45,11 @@ class RipioOrderBookMessage(OrderBookMessage):
 
     @property
     def asks(self) -> List[OrderBookRow]:
-        raise NotImplementedError("Bittrex order book messages have different semantics.")
+        raise NotImplementedError("Ripio order book messages have different semantics.")
 
     @property
     def bids(self) -> List[OrderBookRow]:
-        raise NotImplementedError("Bittrex order book messages have different semantics.")
+        raise NotImplementedError("Ripio order book messages have different semantics.")
 
     @property
     def has_update_id(self) -> bool:
