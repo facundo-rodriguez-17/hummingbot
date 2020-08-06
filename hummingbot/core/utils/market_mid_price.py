@@ -55,6 +55,7 @@ def ripio_mid_price(trading_pair: str) -> Optional[Decimal]:
     if 'status_code' in reports and  reports['status_code'] == 400:
         result = (Decimal(record["bid"]) + Decimal(record["ask"])) / Decimal("2")
     return result
+
 '''
 Ticker test:
    {'pair': 'BTC_USDC', 'last_price': '9363.10', 'low': '9198.43', 'high': '9441.87', 'variation': '-0.42', 
@@ -73,7 +74,6 @@ Ticker test:
         return result
 
 '''
-
 
 @cachetools.func.ttl_cache(ttl=10)
 def kucoin_mid_price(trading_pair: str) -> Optional[Decimal]:
@@ -120,8 +120,9 @@ def kraken_mid_price(trading_pair: str) -> Optional[Decimal]:
     resp = requests.get(url=KRAKEN_PRICE_URL + k_pair)
     resp_json = resp.json()
     if len(resp_json["error"]) == 0:
-        record = resp_json["result"][k_pair]
-        result = (Decimal(record["a"][0]) + Decimal(record["b"][0])) / Decimal("2")
+        for record in resp_json["result"]:  # assume only one pair is received
+            record = resp_json["result"][record]
+            result = (Decimal(record["a"][0]) + Decimal(record["b"][0])) / Decimal("2")
         return result
 
 
