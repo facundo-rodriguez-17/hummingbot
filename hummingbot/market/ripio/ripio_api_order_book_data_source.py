@@ -125,16 +125,16 @@ class RipioAPIOrderBookDataSource(OrderBookTrackerDataSource):
                 raise IOError(f"Error fetching Ripio market snapshot for {trading_pair}. "
                               f"HTTP status is {response.status}.")
             data: Dict[str, Any] = await response.json()
-            bid = [[d["price"], d["amount"], data["updated_id"]] for d in data["buy"]]
-            ask = [[d["price"], d["amount"], data["updated_id"]] for d in data["sell"]]
-            bids = [OrderBookRow(i[0], i[1], i[2]) for i in bid]
-            asks = [OrderBookRow(i[0], i[1], i[2]) for i in ask]
+            bid = [[d["price"], d["amount"]] for d in data["buy"]]
+            ask = [[d["price"], d["amount"]] for d in data["sell"]]
+            bids = [OrderBookRow(i[0], i[1], data["updated_id"]) for i in bid]
+            asks = [OrderBookRow(i[0], i[1], data["updated_id"]) for i in ask]
 
             return {
                 "symbol": trading_pair,
                 "bids": bids,
                 "asks": asks,
-                "updated_id": data["updated_id"]
+                "lastUpdateId": data["updated_id"]
             }
 
     async def _get_response(self, ws: websockets.WebSocketClientProtocol) -> AsyncIterable[str]:
@@ -196,7 +196,6 @@ class RipioAPIOrderBookDataSource(OrderBookTrackerDataSource):
                     async for raw_msg in self._get_response(ws):
                         data = ujson.loads(raw_msg)
                         resp = base64.b64decode(data['payload'])
-                        print(resp)
                         ack = ujson.dumps({'messageId': data['messageId']})
                         await ws.send(ack)
                         msg = ujson.loads(resp)
@@ -237,7 +236,6 @@ class RipioAPIOrderBookDataSource(OrderBookTrackerDataSource):
                         ack = ujson.dumps({'messageId': msg_base['messageId']})
                         await ws.send(ack)
                         resp = base64.b64decode(msg_base['payload'])
-                        print(resp)
                         msg = ujson.loads(resp)
                         order_book_message: OrderBookMessage = RipioOrderBook.diff_message_from_exchange(
                             msg, time.time(), pair)

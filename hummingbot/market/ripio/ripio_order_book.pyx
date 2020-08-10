@@ -8,6 +8,8 @@ from typing import (
     List,
     Optional,
 )
+from aiokafka import ConsumerRecord
+from sqlalchemy.engine import RowProxy
 
 from hummingbot.logger import HummingbotLogger
 from hummingbot.core.event.events import TradeType
@@ -35,10 +37,9 @@ cdef class RipioOrderBook(OrderBook):
                                        metadata: Optional[Dict] = None) -> OrderBookMessage:
         if metadata:
             msg.update(metadata)
-        tmp_list = float()
         return OrderBookMessage(OrderBookMessageType.SNAPSHOT, {
             "trading_pair": msg["trading_pair"],
-            "update_id": msg["updated_id"],
+            "update_id": msg["lastUpdateId"],
             "bids": msg["bids"],
             "asks": msg["asks"]
         }, timestamp=timestamp)
@@ -78,11 +79,14 @@ cdef class RipioOrderBook(OrderBook):
                                    metadata: Optional[Dict] = None) -> OrderBookMessage:
         if metadata:
             msg.update(metadata)
+        bid = [[d["price"], d["amount"]] for d in msg["buy"]]
+        ask = [[d["price"], d["amount"]] for d in msg["sell"]]
+
         return OrderBookMessage(OrderBookMessageType.DIFF, {
             "trading_pair": symbol,
             "update_id": msg["updated_id"],
-            "bids": msg["buy"],
-            "asks": msg["sell"]
+            "bids": bid,
+            "asks": ask
         }, timestamp=timestamp)
 
     @classmethod

@@ -29,21 +29,25 @@ cdef class RipioInFlightOrder(InFlightOrderBase):
         )
 
     @property
+    def order_pair(self) -> str:
+        return self.trading_pair
+
+    @property
     def is_done(self) -> bool:
-        return self.last_state in {"CLOSED"}
+        return self.last_state in {"CANC", "FILL"}
 
     @property
     def is_failure(self) -> bool:
-        return self.last_state in {"CANCELLED", "FAILURE"}
+        return self.last_state in {"CANC"}
 
     @property
     def is_cancelled(self) -> bool:
-        return self.last_state in {"CANCELLED"}
+        return self.last_state in {"CANC"}
 
     @property
     def order_type_description(self) -> str:
-        order_type = "market" if self.order_type is OrderType.MARKET else "limit"
-        side = "buy" if self.trade_type is TradeType.BUY else "sell"
+        order_type = "MARKET" if self.order_type is OrderType.MARKET else "LIMIT"
+        side = "BUY" if self.trade_type is TradeType.BUY else "SELL"
         return f"{order_type} {side}"
 
     @classmethod
