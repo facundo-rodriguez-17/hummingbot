@@ -119,8 +119,7 @@ cdef class RipioMarket(MarketBase):
                  trading_required: bool = True):
 
         super().__init__()
-        #ripio_secret_key = "a963ae2fccf59bbaae607b1a65b3ca2d3305378b2dc59a0659a02b3b675a6513"
-        self._account_id = ""
+        self._account_id = "1"
         self._async_scheduler = AsyncCallScheduler(call_interval=0.5)
         self._data_source_type = order_book_tracker_data_source_type
         self._ev_loop = asyncio.get_event_loop()
@@ -150,7 +149,7 @@ cdef class RipioMarket(MarketBase):
         """
         try:
             m = TRADING_PAIR_SPLITTER.match(trading_pair)
-            return m.group(1), m.group(2)
+            return m.group(1).replace("_", ""), m.group(2).replace("_", "")
         # Exceptions are now logged as warnings in trading pair fetcher
         except Exception as e:            
             return None
@@ -342,6 +341,7 @@ cdef class RipioMarket(MarketBase):
                 if asset_name not in new_balances:
                     new_balances[asset_name] = s_decimal_0
 
+                new_available_balances[asset_name] = free_balance
                 new_balances[asset_name] = free_balance + locked_balance
                     
 
@@ -517,8 +517,6 @@ cdef class RipioMarket(MarketBase):
                         ),
                         # Unique exchange trade ID not available in client order status
                         # But can use validate an order using exchange order ID:
-                        # https://huobiapi.github.io/docs/spot/v1/en/#query-order-by-order-id
-                        exchange_trade_id=exchange_order_id
                     )
                     self.logger().info(f"Filled {execute_amount_diff} out of {tracked_order.amount} of the "
                                        f"order {tracked_order.client_order_id}.")
@@ -628,7 +626,7 @@ cdef class RipioMarket(MarketBase):
         }
         if order_type is OrderType.LIMIT:
             params["limit_price"] = f"{price:f}"
-        self.logger().info(f"place order params: {params}")
+        #self.logger().info(f"place order params: {params}")
         place_order_resp = await self._api_request(
             "post",
             path_url=path_url,
