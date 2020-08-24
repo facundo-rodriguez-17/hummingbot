@@ -5,6 +5,7 @@ from hummingbot.market.huobi.huobi_market import HuobiMarket
 from hummingbot.market.kucoin.kucoin_market import KucoinMarket
 from hummingbot.market.liquid.liquid_market import LiquidMarket
 from hummingbot.market.kraken.kraken_market import KrakenMarket
+from hummingbot.market.ripio.ripio_market import RipioMarket
 from hummingbot.market.eterbase.eterbase_market import EterbaseMarket
 from hummingbot.core.utils.market_mid_price import get_mid_price
 from hummingbot.client.settings import EXCHANGES, DEXES
@@ -25,6 +26,8 @@ class UserBalances:
         market = None
         if exchange == "binance":
             market = BinanceMarket(api_details[0], api_details[1])
+        elif exchange == "ripio":
+            market = RipioMarket(api_details[0], api_details[1])
         elif exchange == "bittrex":
             market = BittrexMarket(api_details[0], api_details[1])
         elif exchange == "coinbase_pro":
@@ -37,8 +40,6 @@ class UserBalances:
             market = LiquidMarket(api_details[0], api_details[1])
         elif exchange == "kraken":
             market = KrakenMarket(api_details[0], api_details[1])
-        elif exchange == "ripio":
-            market = RipioExchangeMarket(api_details[0], api_details[1])
         elif exchange == "eterbase":
             market = EterbaseMarket(api_details[0], api_details[1], api_details[2])
 
@@ -71,12 +72,12 @@ class UserBalances:
             UserBalances.__instance = self
         self._markets = {}
 
-    async def add_exchange(self, exchange, *api_details) -> Optional[str]:
+    async def add_exchange(self, exchange, *api_details) -> Optional[str]:        
         self._markets.pop(exchange, None)
         market = UserBalances.connect_market(exchange, *api_details)
         err_msg = await UserBalances._update_balances(market)
         if err_msg is None:
-            self._markets[exchange] = market
+            self._markets[exchange] = market            
         return err_msg
 
     def all_balances(self, exchange) -> Dict[str, Decimal]:

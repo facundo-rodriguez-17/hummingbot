@@ -119,7 +119,7 @@ cdef class RipioMarket(MarketBase):
                  trading_required: bool = True):
 
         super().__init__()
-        ripio_secret_key = "a963ae2fccf59bbaae607b1a65b3ca2d3305378b2dc59a0659a02b3b675a6513"
+        #ripio_secret_key = "a963ae2fccf59bbaae607b1a65b3ca2d3305378b2dc59a0659a02b3b675a6513"
         self._account_id = ""
         self._async_scheduler = AsyncCallScheduler(call_interval=0.5)
         self._data_source_type = order_book_tracker_data_source_type
@@ -143,6 +143,7 @@ cdef class RipioMarket(MarketBase):
 
     @staticmethod
     def split_trading_pair(trading_pair: str) -> Optional[Tuple[str, str]]:
+        """
         if "_" in trading_pair:
             return tuple(trading_pair.split("_"))
         return tuple(trading_pair.split("-"))
@@ -153,7 +154,6 @@ cdef class RipioMarket(MarketBase):
         # Exceptions are now logged as warnings in trading pair fetcher
         except Exception as e:            
             return None
-        """
 
     @staticmethod
     def convert_from_exchange_trading_pair(exchange_trading_pair: str) -> Optional[str]:
@@ -201,6 +201,8 @@ cdef class RipioMarket(MarketBase):
         }
 
     def restore_tracking_states(self, saved_states: Dict[str, Any]):
+        #for item in saved_states:
+        #   self.logger().info(f"key:{item}   item:{saved_states[]}") 
         self._in_flight_orders.update({
             key: RipioInFlightOrder.from_json(value)
             for key, value in saved_states.items()
@@ -266,7 +268,7 @@ cdef class RipioMarket(MarketBase):
 
     async def _http_client(self) -> aiohttp.ClientSession:
         if self._shared_client is None:
-            self._shared_client = aiohttp.ClientSession()
+            self._shared_client = aiohttp.ClientSession(raise_for_status=False)
         return self._shared_client
 
     async def _api_request(self,
@@ -280,6 +282,14 @@ cdef class RipioMarket(MarketBase):
         headers = {"Content-Type": "application/json"}
         if is_auth_required:
             headers = self._ripio_auth.add_auth_to_params(method, path_url, params)
+            """
+            if method == "post":
+                self.logger().info(f"Url:{url}")
+                self.logger().info(f"Method:{method.upper()}")
+                self.logger().info(f"Headers:{headers}")
+                self.logger().info(f"params:{params}")
+                self.logger().info(f"data:{ujson.dumps(data)}")
+            """
         
         response_coro = client.request(
                 method=method.upper(),
@@ -432,7 +442,7 @@ cdef class RipioMarket(MarketBase):
         'stop_price' (68764560) = {NoneType} None
         'distance' (68764600) = {NoneType} None
         """
-        path_url = f"/order/{order_pair}/{exchange_order_id}"
+        path_url = f"order/{order_pair}/{exchange_order_id}"
         return await self._api_request("get", path_url=path_url, is_auth_required=True)
 
     async def _update_order_status(self):
@@ -445,9 +455,10 @@ cdef class RipioMarket(MarketBase):
             tracked_orders = list(self._in_flight_orders.values())
             for tracked_order in tracked_orders:
                 exchange_order_id = await tracked_order.get_exchange_order_id()
-                pair = tracked_order.order_pair()
+                pair = tracked_order.order_pair
                 try:
                     order_update = await self.get_order_status(exchange_order_id, pair)
+                    self.logger().info(f"Order status  update response: {order_update}")
                 except RipioAPIError as e:
                     err_code = e.error_payload.get("error").get("err-code")
                     self.c_stop_tracking_order(tracked_order.client_order_id)
@@ -473,19 +484,19 @@ cdef class RipioMarket(MarketBase):
                     continue
 
                 order_state = order_update["status"]
-                # possible order states are "CANC" "OPEN" "PART"
+                # possible order states are "CANC" "OPEN" "PART" "COMP"
 
-                if order_state not in ["CANC", "OPEN", "PART", "FILL"]:
+                if order_state not in ["CANC", "OPEN", "PART", "COMP"]:
                     self.logger().debug(f"Unrecognized order update response - {order_update} status:{order_state}")
 
                 # Calculate the newly executed amount for this update.
                 tracked_order.last_state = order_state
-                new_confirmed_amount = Decimal(order_update["field"])  # probably typo in API (filled)
+                new_confirmed_amount = Decimal(order_update["filled"])  # probably typo in API (filled)
                 execute_amount_diff = new_confirmed_amount - tracked_order.executed_amount_base
 
                 if execute_amount_diff > s_decimal_0:
                     tracked_order.executed_amount_base = new_confirmed_amount
-                    tracked_order.executed_amount_quote = Decimal(order_update["field-cash-amount"])
+                    tracked_order.executed_amount_quote = Decimal(order_update["filled"]) * Decimal(order_update["fill_price"])
                     tracked_order.fee_paid = Decimal(order_update["fee"])
                     execute_price = Decimal(order_update["fill_price"])
                     order_filled_event = OrderFilledEvent(
@@ -607,26 +618,26 @@ cdef class RipioMarket(MarketBase):
                           is_buy: bool,
                           order_type: OrderType,
                           price: Decimal) -> str:
-        path_url = "order/orders/place"
-        side = "buy" if is_buy else "sell"
-        order_type_str = "limit" if order_type is OrderType.LIMIT else "market"
+        path_url = 'order/{}/'.format(trading_pair)
+        side = "BUY" if is_buy else "SELL"
+        order_type_str = "LIMIT" if order_type is OrderType.LIMIT else "MARKET"
         params = {
-            "account-id": self._account_id,
             "amount": f"{amount:f}",
-            "client-order-id": order_id,
-            "symbol": trading_pair,
-            "type": f"{side}-{order_type_str}",
+            "side": side,
+            "order_type": order_type_str,
         }
         if order_type is OrderType.LIMIT:
-            params["price"] = f"{price:f}"
-        exchange_order_id = await self._api_request(
+            params["limit_price"] = f"{price:f}"
+        self.logger().info(f"place order params: {params}")
+        place_order_resp = await self._api_request(
             "post",
             path_url=path_url,
-            params=params,
+            params=None,
             data=params,
             is_auth_required=True
         )
-        return str(exchange_order_id)
+        #self.logger().info(f"place order response: {place_order_resp}")
+        return place_order_resp["order_id"]
 
     async def execute_buy(self,
                           order_id: str,
@@ -642,6 +653,7 @@ cdef class RipioMarket(MarketBase):
             str exchange_order_id
             object tracked_order
 
+        """
         if order_type is OrderType.MARKET:
             quote_amount = self.c_get_quote_volume_for_base_amount(trading_pair, True, amount).result_volume
             # Quantize according to price rules, not base token amount rules.
@@ -653,6 +665,14 @@ cdef class RipioMarket(MarketBase):
             if decimal_amount < trading_rule.min_order_size:
                 raise ValueError(f"Buy order amount {decimal_amount} is lower than the minimum order size "
                                  f"{trading_rule.min_order_size}.")
+        """
+
+        decimal_amount = self.c_quantize_order_amount(trading_pair, amount)
+        decimal_price = self.c_quantize_order_price(trading_pair, price)
+        if decimal_amount < trading_rule.min_order_size:
+            raise ValueError(f"Buy order amount {decimal_amount} is lower than the minimum order size "
+                            f"{trading_rule.min_order_size}.")
+
         try:
             temp_order_id = order_id
             exchange_order_id = await self.place_order(order_id, trading_pair, decimal_amount, True, order_type, decimal_price)
@@ -781,8 +801,10 @@ cdef class RipioMarket(MarketBase):
             tracked_order = self._in_flight_orders.get(order_id)
             if tracked_order is None:
                 raise ValueError(f"Failed to cancel order - {order_id}. Order not found.")
-            path_url = f"order/orders/{tracked_order.exchange_order_id}/submitcancel"
+            path_url = f"order/{trading_pair}/{tracked_order.exchange_order_id}/cancel/"
             response = await self._api_request("post", path_url=path_url, is_auth_required=True)
+            self.logger().info(f"cancel response: {response}")
+            return order_id
 
         except RipioAPIError as e:
             order_state = e.error_payload.get("error").get("order-state")
@@ -809,42 +831,47 @@ cdef class RipioMarket(MarketBase):
                 app_warning_msg=f"Failed to cancel the order {order_id} on Ripio. "
                                 f"Check API key and network connection."
             )
+        return None
 
     cdef c_cancel(self, str trading_pair, str order_id):
         safe_ensure_future(self.execute_cancel(trading_pair, order_id))
         return order_id
 
     async def cancel_all(self, timeout_seconds: float) -> List[CancellationResult]:
-        open_orders = [o for o in self._in_flight_orders.values() if o.is_open]
-        if len(open_orders) == 0:
-            return []
-        cancel_order_ids = [o.exchange_order_id for o in open_orders]
-        self.logger().debug(f"cancel_order_ids {cancel_order_ids} {open_orders}")
-        path_url = "order/orders/batchcancel"
-        params = {"order-ids": ujson.dumps(cancel_order_ids)}
-        data = {"order-ids": cancel_order_ids}
-        cancellation_results = []
-        try:
-            cancel_all_results = await self._api_request(
-                "post",
-                path_url=path_url,
-                params=params,
-                data=data,
-                is_auth_required=True
-            )
+        """
+        *required
+        Async function that cancels all active orders.
+        Used by bot's top level stop and exit commands (cancelling outstanding orders on exit)
+        :returns: List of CancellationResult which indicates whether each order is successfully cancelled.
+        """
+        incomplete_orders = [o for o in self._in_flight_orders.values() if not o.is_done] 
+        tasks = [self.execute_cancel(o.trading_pair, o.client_order_id) for o in incomplete_orders]
+        order_id_set = set([o.client_order_id for o in incomplete_orders])
+        successful_cancellations = []
 
-            for oid in cancel_all_results.get("success", []):
-                cancellation_results.append(CancellationResult(oid, True))
-            for cancel_error in cancel_all_results.get("failed", []):
-                oid = cancel_error["order-id"]
-                cancellation_results.append(CancellationResult(oid, False))
+        #raise Exception(f"incomplete_order exchId {incomplete_orders[0].exchange_order_id}  pair{incomplete_orders[0].trading_pair}")
+
+        try:
+            async with timeout(timeout_seconds):
+                results = await safe_gather(*tasks, return_exceptions=True)
+                for client_order_id in results:
+                    if type(client_order_id) is str:
+                        order_id_set.remove(client_order_id)
+                        successful_cancellations.append(CancellationResult(client_order_id, True))
+                    else:
+                        self.logger().warning(
+                            f"failed to cancel order with error: "
+                            f"{repr(client_order_id)}"
+                        )
         except Exception as e:
             self.logger().network(
-                f"Failed to cancel all orders: {cancel_order_ids}",
+                f"Unexpected error cancelling orders.",
                 exc_info=True,
-                app_warning_msg=f"Failed to cancel all orders on Ripio. Check API key and network connection."
+                app_warning_msg="Failed to cancel order on Ripio. Check API key and network connection."
             )
-        return cancellation_results
+
+        failed_cancellations = [CancellationResult(oid, False) for oid in order_id_set]
+        return successful_cancellations + failed_cancellations
 
     cdef OrderBook c_get_order_book(self, str trading_pair):
         cdef:
@@ -883,7 +910,10 @@ cdef class RipioMarket(MarketBase):
     cdef object c_get_order_price_quantum(self, str trading_pair, object price):
         cdef:
             TradingRule trading_rule = self._trading_rules[trading_pair]
-        return trading_rule.min_price_increment
+        price_quantum = trading_rule.min_price_increment
+        if "USD" in trading_pair:
+            price_quantum = Decimal("0.01")
+        return price_quantum
 
     cdef object c_get_order_size_quantum(self, str trading_pair, object order_size):
         cdef:

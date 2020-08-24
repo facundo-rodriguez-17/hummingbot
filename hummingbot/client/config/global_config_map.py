@@ -110,7 +110,6 @@ global_config_map = {
                            ["USDC", 3000],
                            ["TUSD", 3000],
                            ["PAX", 3000]]),
-    
     "binance_api_key":
         ConfigVar(key="binance_api_key",
                   prompt="Enter your Binance API key >>> ",
@@ -123,18 +122,18 @@ global_config_map = {
                   required_if=using_exchange("binance"),
                   is_secure=True,
                   is_connect_key=True),
-    "ripio_api_key": 
-       ConfigVar(key="ripio_api_key",
-                 prompt="Enter your RIPIO API key >>> ",
-                 required_if=using_exchange("ripio"),
-                 is_secure=True,
-                 is_connect_key=True),
-    "ripio_secret_key": 
-       ConfigVar(key="ripio_secret_key",
-                 prompt="Enter your RIPIO secret key >>> ",
-                 required_if=using_exchange("ripio"),
-                 is_secure=True,
-                 is_connect_key=True),
+    "ripio_api_key":
+        ConfigVar(key="ripio_api_key",
+                  prompt="Enter your Ripio API key >>> ",
+                  required_if=using_exchange("ripio"),
+                  is_secure=True,
+                  is_connect_key=True),
+    "ripio_api_secret":
+        ConfigVar(key="ripio_api_secret",
+                  prompt="Enter your Ripio API secret >>> ",
+                  required_if=using_exchange("ripio"),
+                  is_secure=True,
+                  is_connect_key=True),
     "coinbase_pro_api_key":
         ConfigVar(key="coinbase_pro_api_key",
                   prompt="Enter your Coinbase API key >>> ",

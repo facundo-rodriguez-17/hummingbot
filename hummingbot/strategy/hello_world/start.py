@@ -14,7 +14,7 @@ def start(self):
         asset_trading_pair = hello_world_config_map.get("asset_trading_pair").value
 
         try:
-            trading_pair = EXAMPLE_PAIRS.get(market)
+            trading_pair = EXAMPLE_PAIRS.get(market).replace("-", "_")
             self._notify(f"trading_pair: {trading_pair}")     
             assets: Tuple[str, str] = self._initialize_market_assets(market, [trading_pair])[0]
             self._notify(f"Market: {market}")

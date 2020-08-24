@@ -4,6 +4,7 @@ from typing import Optional
 import cachetools.func
 from hummingbot.market.binance.binance_market import BinanceMarket
 from hummingbot.market.kraken.kraken_market import KrakenMarket
+from hummingbot.market.ripio.ripio_market import RipioMarket
 
 
 BINANCE_PRICE_URL = "https://api.binance.com/api/v3/ticker/bookTicker"
@@ -12,7 +13,6 @@ LIQUID_PRICE_URL = "https://api.liquid.com/products"
 BITTREX_PRICE_URL = "https://api.bittrex.com/api/v1.1/public/getmarketsummaries"
 KRAKEN_PRICE_URL = "https://api.kraken.com/0/public/Ticker?pair="
 COINBASE_PRO_PRICE_URL = "https://api.pro.coinbase.com/products/TO_BE_REPLACED/ticker"
-RIPIO_PRICE_URL = 'https://api.exchange.ripio.com/api/v1//rate'
 
 
 def get_mid_price(exchange: str, trading_pair: str) -> Optional[Decimal]:
@@ -48,32 +48,16 @@ def binance_mid_price(trading_pair: str) -> Optional[Decimal]:
 
 @cachetools.func.ttl_cache(ttl=10)
 def ripio_mid_price(trading_pair: str) -> Optional[Decimal]:
-    my_pair = RipioMarket.convert_to_exchange_trading_pair(trading_pair)
-    resp = requests.get(url=RIPIO_PRICE_URL + my_pair)
+    resp = requests.get(url=BINANCE_PRICE_URL)
     records = resp.json()
     result = None
-    if 'status_code' in reports and  reports['status_code'] == 400:
-        result = (Decimal(record["bid"]) + Decimal(record["ask"])) / Decimal("2")
+    for record in records:        
+        pair = RipioMarket.convert_from_exchange_trading_pair(record["symbol"])
+        if trading_pair == pair and record["bidPrice"] is not None and record["askPrice"] is not None:
+            result = (Decimal(record["bidPrice"]) + Decimal(record["askPrice"])) / Decimal("2")
+            break
     return result
 
-'''
-Ticker test:
-   {'pair': 'BTC_USDC', 'last_price': '9363.10', 'low': '9198.43', 'high': '9441.87', 'variation': '-0.42', 
-   'volume': '2.43134', 'base': 'BTC', 'base_name': 'Bitcoin', 'quote': 'USDC', 'quote_name': 
-    'USD Coin', 'bid': '9290.00', 'ask': '9350.00', 'avg': '9289.96', 'ask_volume': '0.09366', 'bid_volume': '0.01360', 
-    'created_at': '2020-07-16 08:42:03.525019+00:00'}   
-    {'status_code': 400, 
-    'errors': {'pair': ['Invalid pair BTC_USDCTTT']}, 'message': 'An error has occurred, please check the form.'}
-
-  k_pair = KrakenMarket.convert_to_exchange_trading_pair(trading_pair)
-    resp = requests.get(url=KRAKEN_PRICE_URL + k_pair)
-    resp_json = resp.json()
-    if len(resp_json["error"]) == 0:
-        record = resp_json["result"][k_pair]
-        result = (Decimal(record["a"][0]) + Decimal(record["b"][0])) / Decimal("2")
-        return result
-
-'''
 
 @cachetools.func.ttl_cache(ttl=10)
 def kucoin_mid_price(trading_pair: str) -> Optional[Decimal]:

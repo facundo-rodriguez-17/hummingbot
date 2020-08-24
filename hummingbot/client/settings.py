@@ -53,6 +53,7 @@ STRATEGIES: List[str] = get_strategy_list()
 EXAMPLE_PAIRS = {
     "bamboo_relay": "ZRX-WETH",
     "binance": "ZRX-ETH",
+    "ripio": "BTC-USDC",
     "bitcoin_com": "ETH-BCH",
     "bittrex": "ZRX-ETH",
     "kucoin": "ETH-USDT",
@@ -62,13 +63,13 @@ EXAMPLE_PAIRS = {
     "liquid": "ETH-USD",
     "radar_relay": "ZRX-WETH",
     "eterbase": "ETH-EUR",
-    "kraken": "ETH-USDC",
-    "ripio" : "ETH-BTC"
+    "kraken": "ETH-USDC"
 }
 
 EXAMPLE_ASSETS = {
     "bamboo_relay": "ZRX",
     "binance": "ZRX",
+    "ripio": "BTC",
     "bitcoin_com": "BCH",
     "bittrex": "ZRX",
     "kucoin": "ETH",
@@ -78,8 +79,7 @@ EXAMPLE_ASSETS = {
     "liquid": "ETH",
     "radar_relay": "ZRX",
     "eterbase": "ETH",
-    "kraken": "XETH",
-    "ripio": "USDC"
+    "kraken": "XETH"
 }
 
 MAXIMUM_OUTPUT_PANE_LINE_COUNT = 1000
