@@ -159,7 +159,7 @@ cdef class RipioMarket(MarketBase):
 
     @staticmethod
     def convert_to_exchange_trading_pair(hb_trading_pair: str) -> str:
-        base_asset, quote_asset = RipioMarket.split_trading_pair(exchange_trading_pair)
+        base_asset, quote_asset = RipioMarket.split_trading_pair(hb_trading_pair)
         return f"{base_asset.upper()}_{quote_asset.upper()}"    
 
     @property
