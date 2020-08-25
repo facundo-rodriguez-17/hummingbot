@@ -142,14 +142,10 @@ cdef class RipioMarket(MarketBase):
 
     @staticmethod
     def split_trading_pair(trading_pair: str) -> Optional[Tuple[str, str]]:
-        """
-        if "_" in trading_pair:
-            return tuple(trading_pair.split("_"))
-        return tuple(trading_pair.split("-"))
-        """
         try:
-            m = TRADING_PAIR_SPLITTER.match(trading_pair)
-            return m.group(1).replace("_", ""), m.group(2).replace("_", "")
+            cut_pair = trading_pair.replace("-", "").replace("_", "")
+            m = TRADING_PAIR_SPLITTER.match(cut_pair)
+            return m.group(1), m.group(2)
         # Exceptions are now logged as warnings in trading pair fetcher
         except Exception as e:            
             return None
@@ -163,7 +159,8 @@ cdef class RipioMarket(MarketBase):
 
     @staticmethod
     def convert_to_exchange_trading_pair(hb_trading_pair: str) -> str:
-        return hb_trading_pair.replace("-", "_")    
+        base_asset, quote_asset = RipioMarket.split_trading_pair(exchange_trading_pair)
+        return f"{base_asset.upper()}_{quote_asset.upper()}"    
 
     @property
     def name(self) -> str:
