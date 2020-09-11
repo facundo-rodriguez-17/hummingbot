@@ -65,7 +65,7 @@ from hummingbot.core.utils.estimate_fee import estimate_fee
 
 hm_logger = None
 s_decimal_0 = Decimal(0)
-TRADING_PAIR_SPLITTER = re.compile(r"^(\w+)(BTC|ETH|BNB|XRP|USDT|USDC|USDS|TUSD|PAX|TRX|BUSD|NGN|RUB|TRY|EUR|IDRT|ZAR|UAH|GBP|BKRW|BIDR)$")
+TRADING_PAIR_SPLITTER = re.compile(r"^(\w+)(BTC|ETH|BNB|XRP|USDT|USDC|USDS|TUSD|PAX|TRX|BUSD|NGN|RUB|TRY|EUR|IDRT|ZAR|UAH|GBP|BKRW|BIDR|DAI|ARS)$")
 RIPIO_ROOT_API = "https://api.exchange.ripio.com/api/v1/"
 
 
@@ -145,15 +145,20 @@ cdef class RipioMarket(MarketBase):
         try:
             cut_pair = trading_pair.replace("-", "").replace("_", "")
             m = TRADING_PAIR_SPLITTER.match(cut_pair)
+            if m == None:
+                raise Exception(f"Incorrect slpit: {trading_pair} => zero")  
             return m.group(1), m.group(2)
         # Exceptions are now logged as warnings in trading pair fetcher
-        except Exception as e:            
-            return None
+        except Exception as e:
+            raise Exception(f"Incorrect slpit: {trading_pair} => zero")            
+            #return None
 
     @staticmethod
     def convert_from_exchange_trading_pair(exchange_trading_pair: str) -> Optional[str]:
         if RipioMarket.split_trading_pair(exchange_trading_pair) is None:
             return None
+
+        split_result = RipioMarket.split_trading_pair(exchange_trading_pair)
         base_asset, quote_asset = RipioMarket.split_trading_pair(exchange_trading_pair)
         return f"{base_asset.upper()}-{quote_asset.upper()}"
 
