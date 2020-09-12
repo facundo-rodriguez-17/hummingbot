@@ -90,8 +90,13 @@ class TradingPairFetcher:
                 async with client.get(RIPIO_ENDPOINT, timeout=API_CALL_TIMEOUT) as response:
                     if response.status == 200:
                         try:
-                            all_trading_pairs: List[Dict[str, any]] = await response.json()
-                            return [item["symbol"] for item in all_trading_pairs if item["enabled"] == True]
+                            data = await response.json()
+                            raw_trading_pairs = [d["symbol"] for d in data["results"] if d["enabled"] == TRUE]
+                            for data in raw_trading_pairs:
+                                data = data.replace("_", "-")
+                            return raw_trading_pairs                 
+                            #all_trading_pairs: List[Dict[str, any]] = await response.json()
+                            #return [item["symbol"] for item in all_trading_pairs if item["enabled"] == True]
                         except Exception:
                             pass
                         return []

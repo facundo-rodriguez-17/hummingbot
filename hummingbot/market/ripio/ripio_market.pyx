@@ -486,9 +486,9 @@ cdef class RipioMarket(MarketBase):
                     continue
 
                 order_state = order_update["status"]
-                # possible order states are "CANC" "OPEN" "PART" "COMP"
+                # possible order states are "CANC" "OPEN" "PART" "COMP" "CLOS"
 
-                if order_state not in ["CANC", "OPEN", "PART", "COMP"]:
+                if order_state not in ["CANC", "OPEN", "PART", "COMP", "CLOS"]:
                     self.logger().debug(f"Unrecognized order update response - {order_update} status:{order_state}")
 
                 # Calculate the newly executed amount for this update.

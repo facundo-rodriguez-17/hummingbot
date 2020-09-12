@@ -32,16 +32,16 @@ cdef class RipioInFlightOrder(InFlightOrderBase):
             trade_type,
             price,
             amount,
-            initial_state  # CANC OPEN PART COMP
+            initial_state  # CANC OPEN PART COMP CLOS
         )
 
     @property
     def is_done(self) -> bool:
-        return self.last_state in {"CANC", "COMP"}
+        return self.last_state in {"CANC", "COMP", "CLOS"}
 
     @property
     def is_cancelled(self) -> bool:
-        return self.last_state in {"CANC"}
+        return self.last_state in {"CANC", "CLOS"}
 
     @property
     def is_failure(self) -> bool:
