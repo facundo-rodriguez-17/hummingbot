@@ -191,10 +191,11 @@ class RipioAPIOrderBookDataSource(OrderBookTrackerDataSource):
     async def _listen_trades_for_pair(self, pair: str, output: asyncio.Queue):
         while True:
             try:
-                ws_uri = DIFF_STREAM_URL + 'trades_' + pair.lower() + '/hummingbot_ripio'
+                ws_uri = DIFF_STREAM_URL + 'trades_' + pair.lower() + '/hummingbot_ripio_trades'
                 async with websockets.connect(ws_uri) as ws:
                     async for raw_msg in self._get_response(ws):
                         data = ujson.loads(raw_msg)
+                        self.logger().info(f"Data:{data}")
                         resp = base64.b64decode(data['payload'])
                         ack = ujson.dumps({'messageId': data['messageId']})
                         await ws.send(ack)
@@ -229,7 +230,7 @@ class RipioAPIOrderBookDataSource(OrderBookTrackerDataSource):
     async def _listen_order_book_for_pair(self, pair: str, output: asyncio.Queue = None):
         while True:
             try:
-                ws_uri = DIFF_STREAM_URL + 'orderbook_' + pair.lower() + '/hummingbot_ripio'
+                ws_uri = DIFF_STREAM_URL + 'orderbook_' + pair.lower() + '/hummingbot_ripio_book'
                 async with websockets.connect(ws_uri) as ws:
                     async for raw_msg in self._get_response(ws):
                         msg_base = ujson.loads(raw_msg)
