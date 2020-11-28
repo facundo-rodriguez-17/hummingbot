@@ -4,7 +4,6 @@ from typing import NamedTuple
 
 from hummingbot.strategy.market_trading_pair_tuple import MarketTradingPairTuple
 
-
 class TriangleArbitragePair(NamedTuple):
     """
     Specifies a pair of markets for cross exchange market making.
