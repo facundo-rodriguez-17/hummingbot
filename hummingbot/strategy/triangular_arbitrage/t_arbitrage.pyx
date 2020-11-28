@@ -193,6 +193,7 @@ cdef class TriangularArbitrageStrategy(StrategyBase):
                 flag_balance_incorrect = True
 
         #Second step
+        self.logger().info(f"TMP LOG - seecond asset:{second.base_asset}-{second.quote_asset}, step_operation_asset:{step_operation_asset}")
         if step_operation_asset == market_pair.second.base_asset:
             step_operation_asset = market_pair.second.quote_asset
             vol_3 = second_bid_price * vol_2

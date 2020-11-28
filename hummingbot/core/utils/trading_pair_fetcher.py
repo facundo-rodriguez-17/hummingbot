@@ -27,7 +27,7 @@ BITCOIN_COM_ENDPOINT = "https://api.exchange.bitcoin.com/api/2/public/symbol"
 ETERBASE_ENDPOINT = "https://api.eterbase.exchange/api/markets"
 KRAKEN_ENDPOINT = "https://api.kraken.com/0/public/AssetPairs"
 
-API_CALL_TIMEOUT = 5
+API_CALL_TIMEOUT = 10
 
 
 class TradingPairFetcher:
