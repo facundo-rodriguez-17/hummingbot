@@ -65,7 +65,7 @@ from hummingbot.core.utils.estimate_fee import estimate_fee
 
 hm_logger = None
 s_decimal_0 = Decimal(0)
-TRADING_PAIR_SPLITTER = re.compile(r"^(\w+)(BTC|ETH|BNB|XRP|USDT|USDC|USDS|TUSD|PAX|TRX|BUSD|NGN|RUB|TRY|EUR|IDRT|ZAR|UAH|GBP|BKRW|BIDR|DAI|ARS)$")
+TRADING_PAIR_SPLITTER = re.compile(r"^(\w+)(BTC|ETH|BNB|XRP|USDT|USDC|USDS|TUSD|PAX|TRX|BUSD|NGN|RUB|TRY|EUR|IDRT|ZAR|UAH|GBP|BKRW|BIDR|DAI|ARS|BRL)$")
 RIPIO_ROOT_API = "https://api.exchange.ripio.com/api/v1/"
 
 
@@ -148,7 +148,7 @@ cdef class RipioMarket(MarketBase):
             if m == None:
                 raise Exception(f"Incorrect slpit: {trading_pair} => zero")  
             return m.group(1), m.group(2)
-        # Exceptions are now logged as warnings in trading pair fetcher
+        # Exceptions are now logged as warnings in trading pair fetcher 
         except Exception as e:
             raise Exception(f"Incorrect slpit: {trading_pair} => zero")            
             #return None
@@ -328,7 +328,7 @@ cdef class RipioMarket(MarketBase):
             dict new_balances = {}
             str asset_name
             object balance
-
+        
         data = await self._api_request("get", path_url=path_url, is_auth_required=True)
         if len(data) > 0:
             for balance_entry in data["list"]:
@@ -350,7 +350,7 @@ cdef class RipioMarket(MarketBase):
             self._account_available_balances.clear()
             self._account_available_balances = new_available_balances
             self._account_balances.clear()
-            self._account_balances = new_balances
+            self._account_balances = new_balances       
 
     cdef object c_get_fee(self,
                           str base_currency,
