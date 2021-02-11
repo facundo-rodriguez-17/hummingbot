@@ -26,6 +26,7 @@ from hummingbot.market.bamboo_relay.bamboo_relay_market import BambooRelayMarket
 from hummingbot.market.dolomite.dolomite_market import DolomiteMarket
 from hummingbot.market.bitcoin_com.bitcoin_com_market import BitcoinComMarket
 from hummingbot.market.kraken.kraken_market import KrakenMarket
+from hummingbot.market.ripio.ripio_market import RipioMarket
 from hummingbot.model.sql_connection_manager import SQLConnectionManager
 
 from hummingbot.wallet.ethereum.ethereum_chain import EthereumChain
@@ -63,7 +64,8 @@ MARKET_CLASSES = {
     "kucoin": KucoinMarket,
     "bitcoin_com": BitcoinComMarket,
     "eterbase": EterbaseMarket,
-    "kraken": KrakenMarket
+    "kraken": KrakenMarket,
+    "ripio": RipioMarket
 }
 
 
@@ -201,7 +203,7 @@ class HummingbotApplication(*commands):
     @staticmethod
     def _initialize_market_assets(market_name: str, trading_pairs: List[str]) -> List[Tuple[str, str]]:
         market_class: MarketBase = MARKET_CLASSES.get(market_name, MarketBase)
-        market_trading_pairs: List[Tuple[str, str]] = [market_class.split_trading_pair(trading_pair) for trading_pair in trading_pairs]
+        market_trading_pairs: List[Tuple[str, str]] = [market_class.split_trading_pair(trading_pair) for trading_pair in trading_pairs]              
         return market_trading_pairs
 
     @staticmethod
@@ -255,6 +257,16 @@ class HummingbotApplication(*commands):
                 market = BinanceMarket(
                     binance_api_key,
                     binance_api_secret,
+                    order_book_tracker_data_source_type=OrderBookTrackerDataSourceType.EXCHANGE_API,
+                    trading_pairs=trading_pairs,
+                    trading_required=self._trading_required,
+                )
+            elif market_name == "ripio":
+                ripio_api_key = global_config_map.get("ripio_api_key").value
+                ripio_api_secret = global_config_map.get("ripio_api_secret").value
+                market = RipioMarket(
+                    ripio_api_key,
+                    ripio_api_secret,
                     order_book_tracker_data_source_type=OrderBookTrackerDataSourceType.EXCHANGE_API,
                     trading_pairs=trading_pairs,
                     trading_required=self._trading_required,

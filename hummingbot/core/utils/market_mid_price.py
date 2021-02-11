@@ -4,6 +4,7 @@ from typing import Optional
 import cachetools.func
 from hummingbot.market.binance.binance_market import BinanceMarket
 from hummingbot.market.kraken.kraken_market import KrakenMarket
+from hummingbot.market.ripio.ripio_market import RipioMarket
 
 
 BINANCE_PRICE_URL = "https://api.binance.com/api/v3/ticker/bookTicker"
@@ -27,6 +28,8 @@ def get_mid_price(exchange: str, trading_pair: str) -> Optional[Decimal]:
         return kraken_mid_price(trading_pair)
     elif exchange == "coinbase_pro":
         return coinbase_pro_mid_price(trading_pair)
+    elif exchange == "ripio":
+        return ripio_mid_price(trading_pair)
     else:
         return binance_mid_price(trading_pair)
 
@@ -38,6 +41,18 @@ def binance_mid_price(trading_pair: str) -> Optional[Decimal]:
     result = None
     for record in records:
         pair = BinanceMarket.convert_from_exchange_trading_pair(record["symbol"])
+        if trading_pair == pair and record["bidPrice"] is not None and record["askPrice"] is not None:
+            result = (Decimal(record["bidPrice"]) + Decimal(record["askPrice"])) / Decimal("2")
+            break
+    return result
+
+@cachetools.func.ttl_cache(ttl=10)
+def ripio_mid_price(trading_pair: str) -> Optional[Decimal]:
+    resp = requests.get(url=BINANCE_PRICE_URL)
+    records = resp.json()
+    result = None
+    for record in records:        
+        pair = RipioMarket.convert_from_exchange_trading_pair(record["symbol"])
         if trading_pair == pair and record["bidPrice"] is not None and record["askPrice"] is not None:
             result = (Decimal(record["bidPrice"]) + Decimal(record["askPrice"])) / Decimal("2")
             break

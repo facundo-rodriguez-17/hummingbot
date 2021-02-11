@@ -20,7 +20,8 @@ OPTIONS = {
     "kraken",
     "ethereum",
     "eterbase",
-    "celo"
+    "celo",
+    "ripio"
 }
 
 
@@ -63,7 +64,7 @@ class ConnectCommand:
                     self.app.to_stop_config = False
                     return
                 Security.update_secure_config(config.key, config.value)
-            api_keys = (await Security.api_keys(exchange)).values()
+            api_keys = (await Security.api_keys(exchange)).values()            
             err_msg = await UserBalances.instance().add_exchange(exchange, *api_keys)
             if err_msg is None:
                 self._notify(f"\nYou are now connected to {exchange}.")

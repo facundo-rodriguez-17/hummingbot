@@ -51,6 +51,8 @@ class CreateCommand:
         config_map = get_strategy_config_map(strategy)
         self._notify(f"Please see https://docs.hummingbot.io/strategies/{strategy.replace('_', '-')}/ "
                      f"while setting up these below configuration.")
+        for config in config_map.values():
+            self._notify("config_map item")
         # assign default values and reset those not required
         for config in config_map.values():
             if config.required:

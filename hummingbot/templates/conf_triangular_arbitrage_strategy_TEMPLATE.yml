@@ -1,0 +1,19 @@
+################################################
+###   Triangular arbitrage strategy config   ###
+################################################
+
+template_version: 4
+strategy: null
+
+# The following configuations are only required for the
+# 3 arbitrage strategy
+
+# Exchange and token parameters
+market: null
+first_market_trading_pair: null
+second_market_trading_pair: null
+third_market_trading_pair: null
+target_asset: null
+order_amount: null
+iteration_time: null
+min_profitability: null

@@ -14,6 +14,7 @@ from .async_utils import safe_ensure_future
 from .ssl_client_request import SSLClientRequest
 
 BINANCE_ENDPOINT = "https://api.binance.com/api/v1/exchangeInfo"
+RIPIO_ENDPOINT = "https://api.exchange.ripio.com/api/v1/pair/"
 RADAR_RELAY_ENDPOINT = "https://api.radarrelay.com/v3/markets"
 BAMBOO_RELAY_ENDPOINT = "https://rest.bamboorelay.com/main/0x/markets"
 COINBASE_PRO_ENDPOINT = "https://api.pro.coinbase.com/products/"
@@ -26,7 +27,7 @@ BITCOIN_COM_ENDPOINT = "https://api.exchange.bitcoin.com/api/2/public/symbol"
 ETERBASE_ENDPOINT = "https://api.eterbase.exchange/api/markets"
 KRAKEN_ENDPOINT = "https://api.kraken.com/0/public/AssetPairs"
 
-API_CALL_TIMEOUT = 5
+API_CALL_TIMEOUT = 10
 
 
 class TradingPairFetcher:
@@ -82,6 +83,23 @@ class TradingPairFetcher:
             pass
 
         return []
+
+    
+    async def fetch_ripio_trading_pairs(self) -> List[str]:
+        async with aiohttp.ClientSession() as client:
+                async with client.get(RIPIO_ENDPOINT, timeout=API_CALL_TIMEOUT) as response:
+                    if response.status == 200:
+                        try:
+                            data = await response.json()
+                            raw_trading_pairs = [d["symbol"] for d in data["results"] if d["enabled"] == TRUE]
+                            for data in raw_trading_pairs:
+                                data = data.replace("_", "-")
+                            return raw_trading_pairs                 
+                            #all_trading_pairs: List[Dict[str, any]] = await response.json()
+                            #return [item["symbol"] for item in all_trading_pairs if item["enabled"] == True]
+                        except Exception:
+                            pass
+                        return []
 
     async def fetch_radar_relay_trading_pairs(self) -> List[str]:
         try:
@@ -364,7 +382,8 @@ class TradingPairFetcher:
                  self.fetch_bitcoin_com_trading_pairs(),
                  self.fetch_kraken_trading_pairs(),
                  self.fetch_radar_relay_trading_pairs(),
-                 self.fetch_eterbase_trading_pairs()]
+                 self.fetch_eterbase_trading_pairs(),
+                 self.fetch_ripio_trading_pairs()]
 
         # Radar Relay has not yet been migrated to a new version
         # Endpoint needs to be updated after migration
@@ -383,6 +402,7 @@ class TradingPairFetcher:
             "bitcoin_com": results[8],
             "kraken": results[9],
             "radar_relay": results[10],
-            "eterbase": results[11]
+            "eterbase": results[11],
+            "ripio": results[12]
         }
         self.ready = True

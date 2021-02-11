@@ -38,7 +38,8 @@ EXCHANGES = {
     "kucoin",
     "bitcoin_com",
     "eterbase",
-    "kraken"
+    "kraken",
+    "ripio"
 }
 
 DEXES = {
@@ -52,6 +53,7 @@ STRATEGIES: List[str] = get_strategy_list()
 EXAMPLE_PAIRS = {
     "bamboo_relay": "ZRX-WETH",
     "binance": "ZRX-ETH",
+    "ripio": "BTC-USDC",
     "bitcoin_com": "ETH-BCH",
     "bittrex": "ZRX-ETH",
     "kucoin": "ETH-USDT",
@@ -67,6 +69,7 @@ EXAMPLE_PAIRS = {
 EXAMPLE_ASSETS = {
     "bamboo_relay": "ZRX",
     "binance": "ZRX",
+    "ripio": "BTC",
     "bitcoin_com": "BCH",
     "bittrex": "ZRX",
     "kucoin": "ETH",
