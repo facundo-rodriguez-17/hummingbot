@@ -27,7 +27,9 @@ BITCOIN_COM_ENDPOINT = "https://api.exchange.bitcoin.com/api/2/public/symbol"
 ETERBASE_ENDPOINT = "https://api.eterbase.exchange/api/markets"
 KRAKEN_ENDPOINT = "https://api.kraken.com/0/public/AssetPairs"
 
-API_CALL_TIMEOUT = 10
+BITCOINTRADE_TRADING_PAIRS = ['BRL-BTC', 'BRL-ETH', 'BRL-LTC', 'BRL-BCH', 'BRL-XRP', 'BRL-EOS', 'BRL-DAI']
+
+API_CALL_TIMEOUT = 5
 
 
 class TradingPairFetcher:
@@ -100,6 +102,9 @@ class TradingPairFetcher:
                         except Exception:
                             pass
                         return []
+
+    async def fetch_bitcointrade_trading_pairs(self) -> List[str]:
+        return BITCOINTRADE_TRADING_PAIRS
 
     async def fetch_radar_relay_trading_pairs(self) -> List[str]:
         try:
@@ -383,7 +388,8 @@ class TradingPairFetcher:
                  self.fetch_kraken_trading_pairs(),
                  self.fetch_radar_relay_trading_pairs(),
                  self.fetch_eterbase_trading_pairs(),
-                 self.fetch_ripio_trading_pairs()]
+                 self.fetch_ripio_trading_pairs(),
+                 self.fetch_bitcointrade_trading_pairs()]
 
         # Radar Relay has not yet been migrated to a new version
         # Endpoint needs to be updated after migration
@@ -403,6 +409,7 @@ class TradingPairFetcher:
             "kraken": results[9],
             "radar_relay": results[10],
             "eterbase": results[11],
-            "ripio": results[12]
+            "ripio": results[12],
+            "bitcointrade": results[13]
         }
         self.ready = True

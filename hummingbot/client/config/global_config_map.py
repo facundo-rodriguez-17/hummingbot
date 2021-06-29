@@ -134,6 +134,12 @@ global_config_map = {
                   required_if=using_exchange("ripio"),
                   is_secure=True,
                   is_connect_key=True),
+    "bitcointrade_api_key":
+        ConfigVar(key="bitcointrade_api_key",
+                  prompt="Enter your Bitcoin Trade API key >>> ",
+                  required_if=using_exchange("bitcointrade"),
+                  is_secure=True,
+                  is_connect_key=True),
     "coinbase_pro_api_key":
         ConfigVar(key="coinbase_pro_api_key",
                   prompt="Enter your Coinbase API key >>> ",

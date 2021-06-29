@@ -13,6 +13,8 @@ from hummingbot.core.data_type.user_stream_tracker import UserStreamTrackerDataS
 from hummingbot.logger import HummingbotLogger
 from hummingbot.logger.application_warning import ApplicationWarning
 from hummingbot.market.binance.binance_market import BinanceMarket
+from hummingbot.market.ripio.ripio_market import RipioMarket
+from hummingbot.market.bitcointrade.bitcointrade_market import BitcoinTradeMarket
 from hummingbot.market.bittrex.bittrex_market import BittrexMarket
 from hummingbot.market.kucoin.kucoin_market import KucoinMarket
 from hummingbot.market.coinbase_pro.coinbase_pro_market import CoinbaseProMarket
@@ -26,7 +28,6 @@ from hummingbot.market.bamboo_relay.bamboo_relay_market import BambooRelayMarket
 from hummingbot.market.dolomite.dolomite_market import DolomiteMarket
 from hummingbot.market.bitcoin_com.bitcoin_com_market import BitcoinComMarket
 from hummingbot.market.kraken.kraken_market import KrakenMarket
-from hummingbot.market.ripio.ripio_market import RipioMarket
 from hummingbot.model.sql_connection_manager import SQLConnectionManager
 
 from hummingbot.wallet.ethereum.ethereum_chain import EthereumChain
@@ -55,6 +56,7 @@ s_logger = None
 MARKET_CLASSES = {
     "bamboo_relay": BambooRelayMarket,
     "binance": BinanceMarket,
+    "bitcointrade": BitcoinTradeMarket,
     "coinbase_pro": CoinbaseProMarket,
     "huobi": HuobiMarket,
     "liquid": LiquidMarket,
@@ -203,7 +205,7 @@ class HummingbotApplication(*commands):
     @staticmethod
     def _initialize_market_assets(market_name: str, trading_pairs: List[str]) -> List[Tuple[str, str]]:
         market_class: MarketBase = MARKET_CLASSES.get(market_name, MarketBase)
-        market_trading_pairs: List[Tuple[str, str]] = [market_class.split_trading_pair(trading_pair) for trading_pair in trading_pairs]              
+        market_trading_pairs: List[Tuple[str, str]] = [market_class.split_trading_pair(trading_pair) for trading_pair in trading_pairs]
         return market_trading_pairs
 
     @staticmethod
@@ -261,12 +263,24 @@ class HummingbotApplication(*commands):
                     trading_pairs=trading_pairs,
                     trading_required=self._trading_required,
                 )
+
             elif market_name == "ripio":
                 ripio_api_key = global_config_map.get("ripio_api_key").value
                 ripio_api_secret = global_config_map.get("ripio_api_secret").value
                 market = RipioMarket(
                     ripio_api_key,
                     ripio_api_secret,
+                    order_book_tracker_data_source_type=OrderBookTrackerDataSourceType.EXCHANGE_API,
+                    trading_pairs=trading_pairs,
+                    trading_required=self._trading_required,
+                )
+
+            elif market_name == "bitcointrade":
+                bitcointrade_api_key = global_config_map.get("bitcointrade_api_key").value
+                bitcointrade_api_secret = global_config_map.get("bitcointrade_api_key").value
+                market = BitcoinTradeMarket(
+                    bitcointrade_api_key,
+                    bitcointrade_api_secret,
                     order_book_tracker_data_source_type=OrderBookTrackerDataSourceType.EXCHANGE_API,
                     trading_pairs=trading_pairs,
                     trading_required=self._trading_required,

@@ -12,6 +12,7 @@ default_cex_estimate = {
     "kucoin": [0.1, 0.1],
     "kucoin": [0, 0],
     "ripio": [0, 0],
+    "bitcointrade": [0, 0],
     "liquid": [0.1, 0.1]}
 
 default_dex_estimate = {

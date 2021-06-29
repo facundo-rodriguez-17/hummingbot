@@ -29,6 +29,7 @@ SCRIPTS_PATH = "scripts/"
 EXCHANGES = {
     "bamboo_relay",
     "binance",
+    "bitcointrade",
     "coinbase_pro",
     "huobi",
     "liquid",
@@ -53,7 +54,8 @@ STRATEGIES: List[str] = get_strategy_list()
 EXAMPLE_PAIRS = {
     "bamboo_relay": "ZRX-WETH",
     "binance": "ZRX-ETH",
-    "ripio": "BTC-USDC",
+    "ripio": "BTC-ARS",
+    "bitcointrade": "BRL-BTC",
     "bitcoin_com": "ETH-BCH",
     "bittrex": "ZRX-ETH",
     "kucoin": "ETH-USDT",
@@ -70,6 +72,7 @@ EXAMPLE_ASSETS = {
     "bamboo_relay": "ZRX",
     "binance": "ZRX",
     "ripio": "BTC",
+    "bitcointrade": "BTC",
     "bitcoin_com": "BCH",
     "bittrex": "ZRX",
     "kucoin": "ETH",

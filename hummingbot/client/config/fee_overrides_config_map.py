@@ -18,6 +18,8 @@ fee_overrides_config_map = {
     "binance_taker_fee": new_fee_config_var("binance_taker_fee"),
     "ripio_maker_fee": new_fee_config_var("ripio_maker_fee"),
     "ripio_taker_fee": new_fee_config_var("ripio_taker_fee"),
+    "bitcointrade_maker_fee": new_fee_config_var("bitcointrade_maker_fee"),
+    "bitcointrade_taker_fee": new_fee_config_var("bitcointrade_taker_fee"),
     "coinbase_pro_maker_fee": new_fee_config_var("coinbase_pro_maker_fee"),
     "coinbase_pro_taker_fee": new_fee_config_var("coinbase_pro_taker_fee"),
     "huobi_maker_fee": new_fee_config_var("huobi_maker_fee"),

@@ -21,7 +21,8 @@ OPTIONS = {
     "ethereum",
     "eterbase",
     "celo",
-    "ripio"
+    "ripio",
+    "bitcointrade"
 }
 
 

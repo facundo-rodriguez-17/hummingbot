@@ -6,6 +6,7 @@ from hummingbot.market.kucoin.kucoin_market import KucoinMarket
 from hummingbot.market.liquid.liquid_market import LiquidMarket
 from hummingbot.market.kraken.kraken_market import KrakenMarket
 from hummingbot.market.ripio.ripio_market import RipioMarket
+from hummingbot.market.bitcointrade.bitcointrade_market import BitcoinTradeMarket
 from hummingbot.market.eterbase.eterbase_market import EterbaseMarket
 from hummingbot.core.utils.market_mid_price import get_mid_price
 from hummingbot.client.settings import EXCHANGES, DEXES
@@ -28,6 +29,8 @@ class UserBalances:
             market = BinanceMarket(api_details[0], api_details[1])
         elif exchange == "ripio":
             market = RipioMarket(api_details[0], api_details[1])
+        elif exchange == "bitcointrade":
+            market = BitcoinTradeMarket(api_details[0], api_details[0])
         elif exchange == "bittrex":
             market = BittrexMarket(api_details[0], api_details[1])
         elif exchange == "coinbase_pro":
